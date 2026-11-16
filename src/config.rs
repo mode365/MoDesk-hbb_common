@@ -114,7 +114,11 @@ const CHARS: &[char] = &[
 ];
 
 pub const RENDEZVOUS_SERVERS: &[&str] = &["1.92.70.134"];
-pub const RS_PUB_KEY: &str = "cGPeYoN7qOjEUTaOdgJZ102esUiYZByiAezG+GnYWLc=";
+// Public key of the rendezvous server running on 1.92.70.134, confirmed by
+// the user's working manual client config (host/relay/api/key), 2026-11.
+// Must stay 44 base64 chars (= 32-byte ed25519 key); a single wrong char
+// makes the client fall back to keyless mode and the server reject it.
+pub const RS_PUB_KEY: &str = "blCo65NQqnn2BPwErvRnJqUEXpyTmx3IfKhGtixfHzI=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
 pub const RELAY_PORT: i32 = 21117;

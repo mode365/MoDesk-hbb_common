@@ -108,6 +108,13 @@ message PunchHoleSent {
   int32 upnp_port = 6;
   bytes socket_addr_v6 = 7;
   string webrtc_sdp_answer = 8;
+  // MoDesk custom mesh tunnel (tailcat): the controlled side's one-time tunnel
+  // address and the local listening port it exposes. Carried to the controlling
+  // side through the rendezvous server's punch response; servers that rebuild
+  // the response field-by-field drop unknown fields, so both sides must upgrade
+  // together, and older servers (or non-MoDesk peers) simply leave them empty.
+  string tailcat_addr = 9;
+  int32 tailcat_port = 10;
 }
 
 message RegisterPk {
@@ -154,6 +161,11 @@ message PunchHoleResponse {
   int32 upnp_port = 10;
   bytes socket_addr_v6 = 11;
   string webrtc_sdp_answer = 12;
+  // MoDesk custom mesh tunnel (tailcat): forwarded by the rendezvous server
+  // from the controlled side's PunchHoleSent (see the notes there). Empty on
+  // failure responses and when the peer or server does not provide a tunnel.
+  string tailcat_addr = 13;
+  int32 tailcat_port = 14;
 }
 
 message ConfigUpdate {
@@ -189,6 +201,12 @@ message RelayResponse {
   bytes socket_addr_v6 = 10;
   int32 upnp_port = 11;
   string webrtc_sdp_answer = 12;
+  // MoDesk mesh tunnel (tailcat): the controlled side advertises its serve
+  // tunnel here as well, so the controller can tunnel through tailcat's DERP
+  // relays even when the punch failed and the connection fell back to a relay
+  // (symmetric NAT). The rendezvous server forwards these fields as-is.
+  string tailcat_addr = 13;
+  int32 tailcat_port = 14;
 }
 
 message SoftwareUpdate { string url = 1; }
