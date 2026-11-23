@@ -227,16 +227,30 @@ pub fn get_version_from_url(url: &str) -> String {
 
 pub fn gen_version() {
     println!("cargo:rerun-if-changed=Cargo.toml");
+    println!("cargo:rerun-if-env-changed=MODESK_VERSION");
     use std::io::prelude::*;
     let mut file = File::create("./src/version.rs").unwrap();
-    for line in read_lines("Cargo.toml").unwrap().flatten() {
-        let ab: Vec<&str> = line.split('=').map(|x| x.trim()).collect();
-        if ab.len() == 2 && ab[0] == "version" {
-            file.write_all(format!("pub const VERSION: &str = {};\n", ab[1]).as_bytes())
-                .ok();
-            break;
+    // MoDesk: MODESK_VERSION overrides the Cargo.toml version entirely, so a
+    // timestamped build version such as "1.5.3.20261123121014" — one
+    // component beyond what a cargo manifest may hold — can be baked into the
+    // binary while Cargo.toml stays a valid semver. CI exports it before the
+    // cargo builds; locally it is unset and Cargo.toml's version applies.
+    let version = match std::env::var("MODESK_VERSION") {
+        Ok(v) if !v.trim().is_empty() => format!("\"{}\"", v.trim()),
+        _ => {
+            let mut version = String::new();
+            for line in read_lines("Cargo.toml").unwrap().flatten() {
+                let ab: Vec<&str> = line.split('=').map(|x| x.trim()).collect();
+                if ab.len() == 2 && ab[0] == "version" {
+                    version = ab[1].to_owned();
+                    break;
+                }
+            }
+            version
         }
-    }
+    };
+    file.write_all(format!("pub const VERSION: &str = {};\n", version).as_bytes())
+        .ok();
     // generate build date
     let build_date = format!("{}", chrono::Local::now().format("%Y-%m-%d %H:%M"));
     file.write_all(
