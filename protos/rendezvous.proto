@@ -230,6 +230,13 @@ message LocalAddr {
   string id = 4;
   string version = 5;
   bytes socket_addr_v6 = 6;
+  // MoDesk mesh tunnel (tailcat): the controlled side advertises its serve
+  // tunnel on the LAN path too (FetchLocalAddr -> LocalAddr -> punch reply),
+  // so a controller on the same intranet can still choose the encrypted
+  // tunnel. The rendezvous server forwards these fields into its
+  // PunchHoleResponse; numbers match the other tailcat fields in this file.
+  string tailcat_addr = 13;
+  int32 tailcat_port = 14;
 }
 
 message PeerDiscovery {
